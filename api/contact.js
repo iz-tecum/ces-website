@@ -1,79 +1,108 @@
-// api/contact.js
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-function clean(s = "") {
-  return String(s).trim();
-}
-
-function isEmail(s = "") {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s).trim());
-}
+// /api/contact.js (Vercel Serverless Function)
+// No npm install needed — uses Resend HTTP API directly.
 
 export default async function handler(req, res) {
-  // Only allow POST
-  if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") {
-    return res.status(405).json({ ok: false, error: "Method not allowed." });
+    res.setHeader("Allow", "POST");
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
-    const body = req.body || {};
-    const company = clean(body.company); // honeypot
+    const { name, email, subject, message, company } = req.body || {};
 
-    // Honeypot: if filled, pretend success
-    if (company.length) {
+    // Honeypot (bots)
+    if (typeof company === "string" && company.trim().length > 0) {
       return res.status(200).json({ ok: true });
     }
 
-    const name = clean(body.name);
-    const email = clean(body.email);
-    const subject = clean(body.subject);
-    const message = clean(body.message);
-
     // Basic validation
-    if (!name || !email || !subject || !message) {
-      return res.status(400).json({ ok: false, error: "Missing required fields." });
-    }
-    if (name.length > 80) return res.status(400).json({ ok: false, error: "Name too long." });
-    if (email.length > 120 || !isEmail(email)) {
-      return res.status(400).json({ ok: false, error: "Invalid email." });
-    }
-    if (subject.length > 120) return res.status(400).json({ ok: false, error: "Subject too long." });
-    if (message.length > 4000) return res.status(400).json({ ok: false, error: "Message too long." });
+    const clean = (v) => (typeof v === "string" ? v.trim() : "");
+    const n = clean(name);
+    const e = clean(email);
+    const s = clean(subject);
+    const m = clean(message);
 
-    const to = process.env.CONTACT_TO;
-    const from = process.env.CONTACT_FROM || "CES Website <onboarding@resend.dev>";
-
-    if (!process.env.RESEND_API_KEY) {
-      return res.status(500).json({ ok: false, error: "Server not configured (missing RESEND_API_KEY)." });
-    }
-    if (!to) {
-      return res.status(500).json({ ok: false, error: "Server not configured (missing CONTACT_TO)." });
+    if (!n || !e || !s || !m) {
+      return res.status(400).json({ error: "Missing required fields." });
     }
 
-    const safeSubject = `[CES Contact] ${subject}`;
+    if (n.length > 80 || e.length > 120 || s.length > 120 || m.length > 4000) {
+      return res.status(400).json({ error: "Input too long." });
+    }
 
-    await resend.emails.send({
-      from,
-      to,
-      replyTo: email, // so board can reply directly to sender
-      subject: safeSubject,
-      text:
-`New message from CES website:
+    // Light email sanity check
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+    if (!emailOk) {
+      return res.status(400).json({ error: "Invalid email." });
+    }
 
-Name: ${name}
-Email: ${email}
-Subject: ${subject}
+    const RESEND_API_KEY = process.env.RESEND_API_KEY;
+    const TO = process.env.CONTACT_TO_EMAIL || "ilt2109@columbia.edu";
+    const FROM = process.env.CONTACT_FROM_EMAIL || "CES Contact <onboarding@resend.dev>";
+    const PREFIX = process.env.CONTACT_SUBJECT_PREFIX || "CES Website Contact";
+
+    if (!RESEND_API_KEY) {
+      return res.status(500).json({ error: "Server missing RESEND_API_KEY." });
+    }
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+        <h2 style="margin: 0 0 12px;">New CES Website Message</h2>
+        <p style="margin: 0 0 10px;"><strong>Name:</strong> ${escapeHtml(n)}</p>
+        <p style="margin: 0 0 10px;"><strong>Email:</strong> ${escapeHtml(e)}</p>
+        <p style="margin: 0 0 10px;"><strong>Subject:</strong> ${escapeHtml(s)}</p>
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 16px 0;" />
+        <p style="white-space: pre-wrap; margin: 0;">${escapeHtml(m)}</p>
+      </div>
+    `;
+
+    const text =
+`New CES Website Message
+
+Name: ${n}
+Email: ${e}
+Subject: ${s}
 
 Message:
-${message}
-`,
+${m}
+`;
+
+    // Send via Resend Email API
+    const resp = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: FROM,
+        to: [TO],
+        subject: `${PREFIX}: ${s}`,
+        html,
+        text,
+        reply_to: e, // so replying goes to the person who filled the form
+      }),
     });
 
-    return res.status(200).json({ ok: true });
+    const data = await resp.json().catch(() => ({}));
+
+    if (!resp.ok) {
+      return res.status(500).json({
+        error: data?.message || data?.error || "Failed to send email.",
+      });
+    }
+
+    return res.status(200).json({ ok: true, id: data?.id });
   } catch (err) {
-    return res.status(500).json({ ok: false, error: "Failed to send." });
+    return res.status(500).json({ error: err?.message || "Server error." });
   }
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
