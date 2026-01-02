@@ -697,50 +697,36 @@
   }
   .events-email a:hover{ border-bottom-color: rgba(16,24,40,.40); }
 
-  /* =========================
-     INSTAGRAM CARD (stable on mobile)
-     ========================= */
-  .ig-wrap{ margin-top: 38px; }
+/* =========================
+   INSTAGRAM CARD (no extra whitespace)
+   ========================= */
+.ig-wrap{ margin-top: 38px; }
 
-  .ig-card{
-    width: min(1100px, 100%);
-    margin: 0 auto;
-    background: #ffffff;
-    border: 1px solid rgba(16,24,40,.16);
-    border-radius: 4px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(16,24,40,.06);
-  }
+.ig-card{
+  width: min(1100px, 100%);
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid rgba(16,24,40,.16);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(16,24,40,.06);
+}
 
-  /* keep iframe from “squishing” and avoid weird shrinking behavior */
-  .ig-frame{
-    width: 100%;
-    aspect-ratio: 16 / 10;   /* preserves shape while shrinking */
-    min-height: 880px;       /* keeps it usable on medium screens */
-    max-height: 1200px;       /* prevents huge vertical blowouts */
-    border: 0;
-    display: block;
-  }
+/* key fix: use viewport-based height instead of min-height + aspect-ratio */
+.ig-frame{
+  width: 100%;
+  height: clamp(520px, 78vh, 980px);
+  border: 0;
+  display: block;
+}
 
-  @supports not (aspect-ratio: 16 / 10){
-    .ig-frame{
-      height: 770px; /* fallback */
-    }
-  }
+@media (max-width: 980px){
+  .ig-frame{ height: clamp(520px, 72vh, 860px); }
+}
 
-  @media (max-width: 980px){
-    .ig-frame{
-      aspect-ratio: 10 / 14;
-      min-height: 760px;
-    }
-  }
-
-  @media (max-width: 520px){
-    .ig-frame{
-      aspect-ratio: 9 / 16;
-      min-height: 720px;
-    }
-  }
+@media (max-width: 520px){
+  .ig-frame{ height: clamp(440px, 68vh, 440px); }
+}
 
   /* =========================
      FOOTER
