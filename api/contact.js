@@ -13,7 +13,7 @@ module.exports = async (req, res) => {
   // ✅ CORS (must run before any early returns)
   const allowedOrigins = new Set([
     "https://iz-tecum.github.io",
-    "https://ces-website-ep7e6i98q-iz-tecums-projects.vercel.app",
+    "https://ces-website-pqgj5edof-iz-tecums-projects.vercel.app",
   ]);
 
   const origin = req.headers.origin;
@@ -21,7 +21,6 @@ module.exports = async (req, res) => {
     res.setHeader("Access-Control-Allow-Origin", origin);
   } else {
     // If no Origin header (e.g., server-to-server), don't block it.
-    // If you want to be strict, you can omit this.
     res.setHeader("Access-Control-Allow-Origin", "https://iz-tecum.github.io");
   }
 
