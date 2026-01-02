@@ -13,7 +13,7 @@ module.exports = async (req, res) => {
   // ✅ CORS (must run before any early returns)
   const allowedOrigins = new Set([
     "https://iz-tecum.github.io",
-    "https://ces-website-ibbuet0xz-iz-tecums-projects.vercel.app",
+    "https://ces-website-2ic5r7mw1-iz-tecums-projects.vercel.app",
   ]);
 
   const origin = req.headers.origin;
