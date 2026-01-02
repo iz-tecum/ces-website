@@ -16,11 +16,11 @@
     margin:0;
     font-family: Montserrat, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     color:#0b1220;
-    background:#ffffff;
+    background:transparent;
   }
 
   /* =========
-     GLOBAL LINKS (fix hover inconsistency)
+     GLOBAL LINKS
      ========= */
   a{
     color: inherit;
@@ -29,7 +29,14 @@
   }
   a:hover{ text-decoration:none; opacity: .85; }
 
-  /* preserve the crisp “underline links” (hero/footer) without looking washed out */
+  /* accessibility focus */
+  a:focus-visible,
+  button:focus-visible{
+    outline: 3px solid rgba(16,24,40,.35);
+    outline-offset: 3px;
+  }
+
+  /* preserve crisp underline links */
   .hero-socials a,
   .footer-left a,
   .footer-links a{
@@ -59,7 +66,8 @@
     --hero-dim-top: 0.00;
     --hero-dim-bottom: 0.00;
 
-    --hero-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    /* ✅ FIX: match About/Leadership easing so preload/loaded feel identical */
+    --hero-ease: cubic-bezier(0.22, 0, 0.36, 1);
     --hero-fade-ms: 1200ms;
     --hero-hover-ms: 1000ms;
     --hero-interval-ms: 5200ms;
@@ -79,10 +87,15 @@
     --card-bg: rgb(245,245,245);
     --card-radius: 0px;
     --card-gap: 40px;
+
+    /* logo sizing vars */
+    --logo-w: 54px;
+    --logo-h: 58px;
+    --logo-gap: 18px;
   }
 
   /* =========================
-     TOP NAV (same system)
+     TOP NAV (MATCH ABOUT PAGE)
      ========================= */
   .topbar{
     position: fixed;
@@ -106,33 +119,45 @@
     z-index: 60;
   }
   .brand-float img{
-    width: 54px;
-    height: 58px;
+    width: var(--logo-w);
+    height: var(--logo-h);
     object-fit: contain;
-    display:block;
+    display: block;
   }
 
   .topbar-inner{
     width: 100%;
+    margin: 0;
     padding: 14px var(--padX);
+    padding-left: calc(var(--padX) + var(--logo-w) + var(--logo-gap));
     display: flex;
     align-items: center;
     gap: 18px;
+    min-width: 0;
+    position: relative;
   }
 
   .nav{
     margin-left: auto;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    color: var(--nav-hero-text);
+  }
+
+  /* ✅ FIX: desktop row spacing lives on nav-links (since links are wrapped) */
+  .nav .nav-links{
     display:flex;
     align-items:center;
-    gap: 18px;
-    font-size: 13px;
+    gap: clamp(10px, 1.6vw, 18px);
+    font-size: clamp(11px, 1.05vw, 13px);
     letter-spacing: 0.06em;
     text-transform: uppercase;
     white-space: nowrap;
-    color: var(--nav-hero-text);
   }
+
   .nav a{
-    padding: 8px 8px;
+    padding: 8px clamp(4px, 0.7vw, 8px);
     font-weight: 500;
     color: inherit;
     opacity: .95;
@@ -141,24 +166,33 @@
   .nav a:hover{ opacity: .85; }
 
   /* dropdown */
+  .drop{
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+
   .drop > button{
     appearance: none;
     border: 0;
     background: transparent;
     font-family: inherit;
-    font-size: 13px;
+    font-size: inherit;
     font-weight: 500;
     color: inherit;
-    padding: 14px 8px;
+
+    padding: 14px clamp(4px, 0.7vw, 8px);
     cursor: pointer;
     display:flex;
     align-items:center;
     gap: 8px;
+
     letter-spacing: 0.06em;
     text-transform: uppercase;
     position: relative;
     z-index: 101;
   }
+
   .caret{
     width: 0; height: 0;
     border-left: 5px solid transparent;
@@ -172,11 +206,7 @@
   .drop:focus-within .caret{
     transform: translateY(1px) rotate(180deg);
   }
-  .drop{
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-  }
+
   .menu{
     position: absolute;
     left: -5px;
@@ -200,6 +230,7 @@
     transform: translateY(0);
     pointer-events: auto;
   }
+
   .drop::after{
     content:"";
     position:absolute;
@@ -207,6 +238,7 @@
     top: 100%;
     height: 14px;
   }
+
   .menu a{
     display:block;
     padding: 15px 0px;
@@ -216,16 +248,16 @@
     text-transform: uppercase;
     font-size: 12px;
     text-align:center;
-    opacity: 1; /* keep crisp; don’t inherit global fade weirdly */
+    opacity: 1;
     transition: background-color 220ms ease, opacity 220ms ease;
   }
   .menu a:hover{ background: rgba(255,255,255,.08); opacity: .95; }
 
   .recruit{
-    margin-left: 8px;
+    margin-left: clamp(4px, 0.8vw, 8px);
     padding: 12px 18px !important;
     border: 2px solid rgba(255, 255, 255, 0.95);
-    background: transparent;
+    background-color: transparent;
     color: rgba(255,255,255,.95) !important;
     font-weight: 600 !important;
     letter-spacing: .12em;
@@ -238,7 +270,10 @@
       opacity 220ms ease;
     opacity: 1;
   }
-  .recruit:hover{ background-color: rgba(255,255,255,.10); opacity: .95; }
+  .recruit:hover{
+    background-color: rgba(255,255,255,.10);
+    opacity: .95;
+  }
   .recruit:active{ transform: translateY(0px); }
 
   .topbar.is-solid{
@@ -249,23 +284,172 @@
     -webkit-backdrop-filter: blur(10px);
   }
   .topbar.is-solid .nav{ color: var(--nav-solid-text); }
+
   .topbar.is-solid .recruit{
     border-color: rgba(0,0,0,0.856);
     color: rgba(16,24,40,.92) !important;
-    background: transparent;
+    background-color: transparent;
   }
-  .topbar.is-solid .recruit:hover{ background: rgba(16,24,40,.06); }
+  .topbar.is-solid .recruit:hover{
+    background-color: rgba(16,24,40,.06);
+  }
+
+  @media (max-width: 1100px){
+    :root{ --logo-w: 46px; --logo-h: 50px; --logo-gap: 14px; }
+    .topbar-inner{
+      padding: 12px var(--padX);
+      padding-left: calc(var(--padX) + var(--logo-w) + var(--logo-gap));
+    }
+  }
+
+  @media (max-width: 760px){
+    :root{ --logo-w: 40px; --logo-h: 44px; --logo-gap: 12px; }
+    .nav .nav-links{ font-size: 12px; letter-spacing: 0.05em; }
+    .recruit{ padding: 10px 14px !important; }
+  }
 
   /* =========================
-     HERO (slideshow) same
+     MOBILE NAV TOGGLE (MATCH ABOUT PAGE)
+     ========================= */
+  .nav-toggle{
+    display: none;
+    margin-left: auto;
+    width: 44px;
+    height: 44px;
+    padding: 10px;
+    border: 1px solid rgba(255,255,255,.22);
+    background: transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .topbar.is-solid .nav-toggle{ border-color: rgba(16,24,40,.18); }
+  .nav-toggle span{
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: rgba(255,255,255,.92);
+    transition: transform 220ms ease, opacity 220ms ease;
+  }
+  .topbar.is-solid .nav-toggle span{ background: rgba(16,24,40,.88); }
+
+  @media (max-width: 920px){
+    .nav-toggle{ display: inline-flex; }
+
+    .nav{
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 100%;
+      padding: 12px var(--padX) 0;
+      display: block;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 220ms ease, transform 220ms ease;
+      max-height: calc(100vh - 74px);
+      overflow: auto;
+    }
+
+    .topbar.nav-open .nav{
+      pointer-events: auto;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .nav .nav-links{
+      width: min(520px, calc(100vw - (2 * var(--padX))));
+      margin: 0 auto;
+      background: rgba(16,24,40,.92);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 14px 30px rgba(16,24,40,.18);
+      padding: 18px 18px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      align-items: stretch;
+      white-space: normal;
+    }
+
+    .nav a,
+    .drop > button{
+      width: 100%;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .recruit{
+      width: 100%;
+      justify-content: center;
+      margin-left: 0 !important;
+    }
+
+    .topbar.nav-open .nav-toggle span:nth-child(1){ transform: translateY(8px) rotate(45deg); }
+    .topbar.nav-open .nav-toggle span:nth-child(2){ opacity: 0; }
+    .topbar.nav-open .nav-toggle span:nth-child(3){ transform: translateY(-8px) rotate(-45deg); }
+
+    .drop{
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
+    }
+
+    .drop > button{ gap: 10px; }
+
+    .drop .menu{
+      position: static;
+      width: 100%;
+      background: transparent;
+      border: 0;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-6px);
+      transition: max-height 260ms ease, opacity 220ms ease, transform 220ms ease;
+    }
+
+    .drop:hover .menu,
+    .drop:focus-within .menu{
+      max-height: 260px;
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .drop .menu a{
+      background: rgba(255,255,255,.06);
+      padding: 16px 18px;
+      width: 100%;
+      text-align: center;
+      margin: 0;
+    }
+
+    .drop::after{ display: none; }
+  }
+
+/* =========================
+     HERO
      ========================= */
   .hero{
     position: relative;
     height: var(--hero-h);
     min-height: var(--hero-min-h);
     overflow: hidden;
-    background: #0b1220;
     padding-top: 70px;
+    background: transparent; /* ✅ FIX: stays black while images load */
   }
   .hero-bg{
     position:absolute;
@@ -274,7 +458,7 @@
     background-position: center;
     transform: scale(var(--hero-scale));
     filter: blur(var(--hero-blur));
-    opacity: 0;
+    opacity:1;
     transition:
       opacity var(--hero-fade-ms) var(--hero-ease),
       filter var(--hero-hover-ms) var(--hero-ease),
@@ -282,7 +466,7 @@
     will-change: opacity, transform, filter;
   }
   .hero-bg.a{ opacity: 1; }
-  .hero-bg.b{ opacity: 0; }
+  .hero-bg.b{ opacity: 1; }
 
   .hero::before{
     content:"";
@@ -318,14 +502,6 @@
     line-height: 1.05;
     max-width: 2000px;
     margin: 10px auto;
-  }
-  .hero p{
-    margin: 16px auto 0;
-    max-width: 920px;
-    color: rgba(255,255,255,.82);
-    font-size: 14px;
-    line-height: 1.85;
-    font-weight: 400;
   }
 
   .hero-socials{
@@ -391,7 +567,7 @@
     flex: 0 0 420px;
     position: sticky;
     top: 50px;
-    margin-left: 200px;
+    margin-left: clamp(40px, 7vw, 200px);
   }
 
   .side-photo{
@@ -414,21 +590,10 @@
     transition: transform var(--grid-hover-ms) ease;
     will-change: transform;
   }
-  .side-photo:hover::before{
-    transform: scale(var(--grid-scale));
-  }
-
-  .leadership-title{
-    text-align:center;
-    margin: 0 0 26px;
-    font-size: 54px;
-    letter-spacing: -0.03em;
-    font-weight: 600;
-    color: rgba(16,24,40,.92);
-  }
+  .side-photo:hover::before{ transform: scale(var(--grid-scale)); }
 
   .block-title{
-    margin: 40px 0 18px;
+    margin: 40px 0 40px;
     text-align:center;
     font-size: 44px;
     letter-spacing: -0.02em;
@@ -436,11 +601,15 @@
     color: rgba(16,24,40,.92);
   }
 
+  /* =========================
+     PEOPLE GRID
+     ========================= */
   .people-grid{
     display:grid;
-    grid-template-columns: repeat(3, minmax(240px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: var(--card-gap);
-    align-items: start;
+    align-items: stretch;
+    justify-items: center;
   }
 
   .person-card{
@@ -449,26 +618,31 @@
     border-radius: var(--card-radius);
     padding: 34px 28px 28px;
     text-align: center;
-
     display:flex;
     flex-direction: column;
-    min-height: 440px;
-    margin-left: 40px;
-    width: 80%;
+    width: 100%;
+    max-width: 360px;
+    min-height: 420px;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
   }
 
   .person-photo{
-    width: 220px;
-    height: 220px;
+    width: min(220px, 100%);
+    aspect-ratio: 1 / 1;
     border-radius: 999px;
     overflow:hidden;
-    margin: 0 auto 18px;
     background: #e4e4e4;
+    margin: 0 auto 18px;
+    display: grid;
+    place-items: center;
   }
   .person-photo img{
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center center;
     display:block;
   }
 
@@ -486,42 +660,21 @@
     margin: 0 0 18px;
     color: rgba(16,24,40,.72);
   }
-
-  .person-bio{
-    margin: 0 auto;
-    width: 100%;
-    max-width: 520px;
-
-    max-height: 220px;
-    overflow: auto;
-    padding: 0 10px 0 10px;
-
-    color: rgba(16,24,40,.78);
-    font-size: 13px;
-    line-height: 1.95;
-    font-weight: 400;
-  }
-
-  .person-bio::-webkit-scrollbar{ width: 8px; }
-  .person-bio::-webkit-scrollbar-track{ background: transparent; }
-  .person-bio::-webkit-scrollbar-thumb{
-    background: rgba(16,24,40,.18);
-    border-radius: 999px;
-    transition: background-color 220ms ease;
-  }
-  .person-bio:hover::-webkit-scrollbar-thumb{
-    background: rgba(16,24,40,.28);
-  }
+  .person-role:empty{ display:none; }
+  .person-email:empty{ visibility:hidden; }
 
   .person-email{
-    margin: 18px 0 0;
+    margin-top: auto;
+    margin-bottom: 12px;
     font-size: 13px;
     color: rgba(16,24,40,.72);
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .person-connect{
-    margin-top: auto;
-    padding-top: 18px;
+    margin-top: 0;
+    padding-top: 0;
     display:flex;
     justify-content:center;
   }
@@ -531,24 +684,23 @@
     align-items:center;
     justify-content:center;
     padding: 12px 22px;
-    min-width: 140px;
-
+    min-width: 0;
+    width: 100%;
+    max-width: 220px;
     border: 2px solid rgb(0,0,0);
     color: rgba(16,24,40,.92);
     background: transparent;
-
     font-weight: 600;
     letter-spacing: .12em;
     text-transform: uppercase;
     font-size: 12px;
-
     transition: background-color 220ms ease, transform 220ms ease, opacity 220ms ease;
   }
   .connect-btn:hover{ background: rgba(16,24,40,.06); opacity: .95; }
   .connect-btn:active{ transform: translateY(0px); }
 
   /* =========================
-     FOOTER (same)
+     FOOTER
      ========================= */
   .footer{
     padding: 64px var(--padX);
@@ -599,12 +751,22 @@
   }
   .footer-links a:hover{ opacity: .88; border-bottom-color: rgba(16,24,40,.40); }
 
+  .footer-copy{
+    max-width: 1800px;
+    margin: 0px auto 0;
+    padding: 0 var(--padX);
+    text-align: center;
+    color: rgba(16,24,40,.60);
+    font-size: 12px;
+    letter-spacing: .02em;
+  }
+
   /* =========================
      PAGE LOAD + SCROLL REVEAL
      ========================= */
-  body.preload .hero-bg{ opacity: 0 !important; }
-  body.preload .hero-inner > div{ opacity: 0; transform: translateY(18px); }
-  body.preload .hero-socials{ opacity: 0; transform: translateY(10px); }
+  body.preload .hero-bg{ opacity: 1 !important; }
+  body.preload .hero-inner > div{ opacity: 1; transform: translateY(10px); }
+  body.preload .hero-socials{ opacity: 1; transform: translateY(10px); }
 
   body.is-loaded .hero-inner > div{
     opacity: 1;
@@ -632,14 +794,25 @@
   /* =========================
      RESPONSIVE
      ========================= */
-  @media (max-width: 1180px){
-    .people-grid{ grid-template-columns: repeat(2, minmax(240px, 1fr)); }
-    .leadership-side{ width: 320px; flex-basis: 320px; }
-    .side-photo{ height: 640px; }
+  @media (max-width: 1700px){
+    .person-card{ max-width: 340px; min-height: 420px; }
+    .person-photo{ width: min(205px, 100%); }
   }
+
+  @media (max-width: 1480px){
+    .people-grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .person-card{ max-width: 360px; }
+    .person-photo{ width: min(200px, 100%); }
+  }
+
+  @media (max-width: 1180px){
+    .people-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .leadership-side{ width: 320px; flex-basis: 320px; margin-left: 40px; }
+    .side-photo{ height: 640px; }
+    .person-photo{ width: min(190px, 100%); }
+  }
+
   @media (max-width: 980px){
-    .nav{ gap: 10px; font-size: 12px; }
-    .recruit{ padding: 10px 14px !important; }
     .hero{ min-height: 560px; }
 
     .leadership-layout{ flex-direction: column; }
@@ -652,10 +825,17 @@
     .side-photo{ height: 520px; }
 
     .people-grid{ grid-template-columns: 1fr; }
+    .person-card{ max-width: 520px; }
 
     .footer-inner{ flex-direction: column; }
     .footer-right{ text-align:left; }
     .footer-links{ align-items:flex-start; }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce){
+    *{ transition: none !important; scroll-behavior: auto !important; }
+    .hero-bg{ transition: none !important; }
   }
 
   /* =========================
@@ -669,14 +849,24 @@
 </head>
 
 <body class="preload">
-  <!-- NAV -->
-  <header class="topbar" id="topbar">
-    <div class="topbar-inner">
-      <a class="brand brand-float" href="../index.html" aria-label="Home">
-        <img src="../media/ceslogo.png" alt="Columbia Economics Society logo">
-      </a>
+<!-- NAV -->
+<header class="topbar" id="topbar">
+  <div class="topbar-inner">
+    <a class="brand brand-float" href="../index.html" aria-label="Home">
+      <img src="../media/ceslogo.png" alt="Columbia Economics Society logo">
+    </a>
 
-      <nav class="nav" aria-label="Primary">
+    <!-- MOBILE TOGGLE (hamburger) -->
+    <button class="nav-toggle"
+            type="button"
+            aria-label="Open menu"
+            aria-expanded="false"
+            aria-controls="mobileNav">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav class="nav" id="mobileNav" aria-label="Primary">
+      <div class="nav-links">
         <div class="drop" id="aboutDrop">
           <button type="button" id="aboutBtn" aria-haspopup="true" aria-expanded="false">
             ABOUT US <span class="caret" aria-hidden="true"></span>
@@ -691,12 +881,13 @@
         <a href="../alumni/index.html">ALUMNI</a>
         <a href="../faq/index.html">FAQ</a>
         <a href="../contact/index.html">CONTACT</a>
-                     <a class="recruit" href="../recruitment/index.html">RECRUITMENT</a>
-      </nav>
-    </div>
-  </header>
+        <a class="recruit" href="../recruitment/index.html">RECRUITMENT</a>
+      </div>
+    </nav>
+  </div>
+</header>
 
-  <main class="page-clip">
+<main class="page-clip">
   <!-- HERO -->
   <section class="hero leadership-hero" id="hero">
     <div class="hero-bg a" id="bgA"></div>
@@ -718,395 +909,408 @@
     </div>
   </section>
 </main>
-  <!-- MAIN -->
-  <section class="section reveal" id="leadership">
-    <div class="wrap">
-      <div class="leadership-layout">
 
-        <!-- LEFT: people -->
-        <div class="leadership-main">
-          <h2 class="block-title">Executive Board</h2>
-          <div class="people-grid">
+<!-- MAIN -->
+<section class="section reveal" id="leadership">
+  <div class="wrap">
+    <div class="leadership-layout">
 
-<div class="person-card">
-  <div class="person-photo">
-    <img src="../headshots/james.jpg" alt="Placeholder headshot 1">
-  </div>
+      <!-- LEFT: people -->
+      <div class="leadership-main">
+        <h2 class="block-title">Executive Board</h2>
+        <div class="people-grid">
 
-  <div class="person-name">James Park CC’27</div>
-  <div class="person-role">Co-President</div>
-
-  <div class="person-email">Email: jp4655@columbia.edu</div>
-
-  <div class="person-connect">
-    <a class="connect-btn" href="https://www.linkedin.com/in/james-prk/" target="_blank" rel="noopener">
-      CONNECT
-    </a>
-  </div>
-</div>
-
-<div class="person-card">
-  <div class="person-photo">
-    <img src="../headshots/joshua.jpg" alt="Placeholder headshot 1">
-  </div>
-
-  <div class="person-name">Joshua Park CC’26</div>
-  <div class="person-role">Co-President</div>
-
-  <div class="person-email">Email: jp4346@columbia.edu</div>
-
-  <div class="person-connect">
-    <a class="connect-btn" href="https://www.linkedin.com/in/joshua-park-829821260/" target="_blank" rel="noopener">
-      CONNECT
-    </a>
-  </div>
-</div>
-
-<div class="person-card">
-  <div class="person-photo">
-    <img src="../headshots/jocelyn.jpg" alt="Placeholder headshot 1">
-  </div>
-
-  <div class="person-name">Jocelyn Chu CC’26</div>
-  <div class="person-role">Vice President</div>
-
-  <div class="person-email">Email: jvc2142@columbia.edu</div>
-
-  <div class="person-connect">
-    <a class="connect-btn" href="https://www.linkedin.com/in/jocelynvchu/" target="_blank" rel="noopener">
-      CONNECT
-    </a>
-  </div>
-</div>
-
-<div class="person-card">
-  <div class="person-photo">
-    <img src="../headshots/nicole.jpg" alt="Placeholder headshot 1">
-  </div>
-
-  <div class="person-name">Nicole Huang SEAS’27</div>
-  <div class="person-role">Treasurer</div>
-
-  <div class="person-email">Email: nzh2107@columbia.edu</div>
-
-  <div class="person-connect">
-    <a class="connect-btn" href="https://www.linkedin.com/in/nicole-huang-358662243/" target="_blank" rel="noopener">
-      CONNECT
-    </a>
-  </div>
-</div>
-
-<div class="person-card">
-  <div class="person-photo">
-    <img src="../headshots/carlos.jpg" alt="Placeholder headshot 1">
-  </div>
-
-  <div class="person-name">Carlos Murillo CC’28</div>
-  <div class="person-role">Social Chair</div>
-
-  <div class="person-email">Email: cpm2172@columbia.edu</div>
-
-  <div class="person-connect">
-    <a class="connect-btn" href="https://www.linkedin.com/in/carlos-murillo5/" target="_blank" rel="noopener">
-      CONNECT
-    </a>
-  </div>
-</div>
-
-<div class="person-card">
-  <div class="person-photo">
-    <img src="../headshots/lucrezia.jpg" alt="Placeholder headshot 1">
-  </div>
-
-  <div class="person-name">Lucrezia Adani CC’27</div>
-  <div class="person-role">Director of Communications</div>
-
-  <div class="person-email">Email: lsa2154@columbia.edu</div>
-
-  <div class="person-connect">
-    <a class="connect-btn" href="https://www.linkedin.com/in/lucrezia-serena-adani/" target="_blank" rel="noopener">
-      CONNECT
-    </a>
-  </div>
-</div>
-
-<div class="person-card">
-  <div class="person-photo">
-    <img src="../headshots/maria.jpg" alt="Placeholder headshot 1">
-  </div>
-
-  <div class="person-name">Maria Beka CC’28</div>
-  <div class="person-role">Director of Economics</div>
-
-  <div class="person-email">Email: mb5039@columbia.edu</div>
-
-  <div class="person-connect">
-    <a class="connect-btn" href="https://www.linkedin.com/in/mariabeka-/" target="_blank" rel="noopener">
-      CONNECT
-    </a>
-  </div>
-</div>
-
-<div class="person-card">
-  <div class="person-photo">
-    <img src="../headshots/fiona.jpg" alt="Placeholder headshot 1">
-  </div>
-
-  <div class="person-name">Fiona Lin CC’27</div>
-  <div class="person-role">Director of Banking</div>
-
-  <div class="person-email">Email: fl2670@columbia.edu</div>
-
-  <div class="person-connect">
-    <a class="connect-btn" href="https://www.linkedin.com/in/fiona--lin/" target="_blank" rel="noopener">
-      CONNECT
-    </a>
-  </div>
-</div>
-
-<div class="person-card">
-  <div class="person-photo">
-    <img src="../headshots/eman.jpg" alt="Placeholder headshot 1">
-  </div>
-
-  <div class="person-name">Eman Kokhar CC’28</div>
-  <div class="person-role">Director of Consulting</div>
-
-  <div class="person-email">Email: esk2193@columbia.edu</div>
-
-  <div class="person-connect">
-    <a class="connect-btn" href="https://www.linkedin.com/in/eman-khokhar-565601332/" target="_blank" rel="noopener">
-      CONNECT
-    </a>
-  </div>
-</div>
-
-<div class="person-card">
-  <div class="person-photo">
-    <img src="../headshots/arthur.jpg" alt="Placeholder headshot 1">
-  </div>
-
-  <div class="person-name">Arthur Campos SEAS’27</div>
-  <div class="person-role">Director of Business</div>
-
-  <div class="person-email">Email: ac5474@columbia.edu</div>
-
-  <div class="person-connect">
-    <a class="connect-btn" href="https://www.linkedin.com/in/arthur-campos-sim%C3%B5es/" target="_blank" rel="noopener">
-      CONNECT
-    </a>
-  </div>
-</div>
-
+          <div class="person-card">
+            <div class="person-photo">
+              <img src="../headshots/james.jpg" alt="James Park headshot">
+            </div>
+            <div class="person-name">James Park CC’27</div>
+            <div class="person-role">Co-President</div>
+            <div class="person-email">Email: jp4655@columbia.edu</div>
+            <div class="person-connect">
+              <a class="connect-btn" href="https://www.linkedin.com/in/james-prk/" target="_blank" rel="noopener noreferrer">CONNECT</a>
+            </div>
           </div>
 
-          <h2 class="block-title">Senior Advisors</h2>
-          <div class="people-grid">
-
-<div class="person-card">
-  <div class="person-photo">
-    <img src="../headshots/jacqueline.jpg" alt="Placeholder headshot 1">
-  </div>
-
-  <div class="person-name">Jacqueline Yang BC'26</div>
-
-  <div class="person-connect">
-    <a class="connect-btn" href="https://www.linkedin.com/in/jacqueyang/" target="_blank" rel="noopener">
-      CONNECT
-    </a>
-  </div>
-</div>
-
-<div class="person-card">
-  <div class="person-photo">
-    <img src="../headshots/ellie.jpg" alt="Placeholder headshot 1">
-  </div>
-
-  <div class="person-name">Ellie Reidenbach CC'26</div>
-
-  <div class="person-connect">
-    <a class="connect-btn" href="https://www.linkedin.com/in/elliereidenbach/" target="_blank" rel="noopener">
-      CONNECT
-    </a>
-  </div>
-</div>
-
-<div class="person-card">
-  <div class="person-photo">
-    <img src="../headshots/ishaan.jpg" alt="Placeholder headshot 1">
-  </div>
-
-  <div class="person-name">Ishaan Singh CC'26</div>
-
-  <div class="person-connect">
-    <a class="connect-btn" href="https://www.linkedin.com/in/ishaansingh205/" target="_blank" rel="noopener">
-      CONNECT
-    </a>
-  </div>
-</div>
-
-<div class="person-card">
-  <div class="person-photo">
-    <img src="../headshots/justin.jpg" alt="Placeholder headshot 1">
-  </div>
-
-  <div class="person-name">Justin Burks Jr. CC'26</div>
-
-  <div class="person-connect">
-    <a class="connect-btn" href="https://www.linkedin.com/in/justinburksjr/" target="_blank" rel="noopener">
-      CONNECT
-    </a>
-  </div>
-</div>
-
-<div class="person-card">
-  <div class="person-photo">
-    <img src="../headshots/renee.jpg" alt="Placeholder headshot 1">
-  </div>
-
-  <div class="person-name">Renee Jiang CC'26</div>
-
-  <div class="person-connect">
-    <a class="connect-btn" href="https://www.linkedin.com/in/renee-jiang7/" target="_blank" rel="noopener">
-      CONNECT
-    </a>
-  </div>
-</div>
-
-<div class="person-card">
-  <div class="person-photo">
-    <img src="../headshots/siddharth.jpg" alt="Placeholder headshot 1">
-  </div>
-
-  <div class="person-name">Siddharth Sundararajan CC'26</div>
-
-  <div class="person-connect">
-    <a class="connect-btn" href="https://www.linkedin.com/in/siddharth-sundararajan-b1a269209/" target="_blank" rel="noopener">
-      CONNECT
-    </a>
-  </div>
-</div>
-
-<div class="person-card">
-  <div class="person-photo">
-    <img src="../headshots/vinson.jpg" alt="Placeholder headshot 1">
-  </div>
-
-  <div class="person-name">Vinson Zhang CC'26</div>
-
-  <div class="person-connect">
-    <a class="connect-btn" href="https://www.linkedin.com/in/vinsonzhang04/" target="_blank" rel="noopener">
-      CONNECT
-    </a>
-  </div>
-</div>
-
+          <div class="person-card">
+            <div class="person-photo">
+              <img src="../headshots/joshua.jpg" alt="Joshua Park headshot">
+            </div>
+            <div class="person-name">Joshua Park CC’26</div>
+            <div class="person-role">Co-President</div>
+            <div class="person-email">Email: jp4346@columbia.edu</div>
+            <div class="person-connect">
+              <a class="connect-btn" href="https://www.linkedin.com/in/joshua-park-829821260/" target="_blank" rel="noopener noreferrer">CONNECT</a>
+            </div>
           </div>
+
+          <div class="person-card">
+            <div class="person-photo">
+              <img src="../headshots/jocelyn.jpg" alt="Jocelyn Chu headshot">
+            </div>
+            <div class="person-name">Jocelyn Chu CC’26</div>
+            <div class="person-role">Vice President</div>
+            <div class="person-email">Email: jvc2142@columbia.edu</div>
+            <div class="person-connect">
+              <a class="connect-btn" href="https://www.linkedin.com/in/jocelynvchu/" target="_blank" rel="noopener noreferrer">CONNECT</a>
+            </div>
+          </div>
+
+          <div class="person-card">
+            <div class="person-photo">
+              <img src="../headshots/nicole.jpg" alt="Nicole Huang headshot">
+            </div>
+            <div class="person-name">Nicole Huang SEAS’27</div>
+            <div class="person-role">Treasurer</div>
+            <div class="person-email">Email: nzh2107@columbia.edu</div>
+            <div class="person-connect">
+              <a class="connect-btn" href="https://www.linkedin.com/in/nicole-huang-358662243/" target="_blank" rel="noopener noreferrer">CONNECT</a>
+            </div>
+          </div>
+
+          <div class="person-card">
+            <div class="person-photo">
+              <img src="../headshots/carlos.jpg" alt="Carlos Murillo headshot">
+            </div>
+            <div class="person-name">Carlos Murillo CC’28</div>
+            <div class="person-role">Social Chair</div>
+            <div class="person-email">Email: cpm2172@columbia.edu</div>
+            <div class="person-connect">
+              <a class="connect-btn" href="https://www.linkedin.com/in/carlos-murillo5/" target="_blank" rel="noopener noreferrer">CONNECT</a>
+            </div>
+          </div>
+
+          <div class="person-card">
+            <div class="person-photo">
+              <img src="../headshots/lucrezia.jpg" alt="Lucrezia Adani headshot">
+            </div>
+            <div class="person-name">Lucrezia Adani CC’27</div>
+            <div class="person-role">Director of Communications</div>
+            <div class="person-email">Email: lsa2154@columbia.edu</div>
+            <div class="person-connect">
+              <a class="connect-btn" href="https://www.linkedin.com/in/lucrezia-serena-adani/" target="_blank" rel="noopener noreferrer">CONNECT</a>
+            </div>
+          </div>
+
+          <div class="person-card">
+            <div class="person-photo">
+              <img src="../headshots/maria.jpg" alt="Maria Beka headshot">
+            </div>
+            <div class="person-name">Maria Beka CC’28</div>
+            <div class="person-role">Director of Economics</div>
+            <div class="person-email">Email: mb5039@columbia.edu</div>
+            <div class="person-connect">
+              <a class="connect-btn" href="https://www.linkedin.com/in/mariabeka-/" target="_blank" rel="noopener noreferrer">CONNECT</a>
+            </div>
+          </div>
+
+          <div class="person-card">
+            <div class="person-photo">
+              <img src="../headshots/fiona.jpg" alt="Fiona Lin headshot">
+            </div>
+            <div class="person-name">Fiona Lin CC’27</div>
+            <div class="person-role">Director of Banking</div>
+            <div class="person-email">Email: fl2670@columbia.edu</div>
+            <div class="person-connect">
+              <a class="connect-btn" href="https://www.linkedin.com/in/fiona--lin/" target="_blank" rel="noopener noreferrer">CONNECT</a>
+            </div>
+          </div>
+
+          <div class="person-card">
+            <div class="person-photo">
+              <img src="../headshots/eman.jpg" alt="Eman Khokhar headshot">
+            </div>
+            <div class="person-name">Eman Kokhar CC’28</div>
+            <div class="person-role">Director of Consulting</div>
+            <div class="person-email">Email: esk2193@columbia.edu</div>
+            <div class="person-connect">
+              <a class="connect-btn" href="https://www.linkedin.com/in/eman-khokhar-565601332/" target="_blank" rel="noopener noreferrer">CONNECT</a>
+            </div>
+          </div>
+
+          <div class="person-card">
+            <div class="person-photo">
+              <img src="../headshots/arthur.jpg" alt="Arthur Campos headshot">
+            </div>
+            <div class="person-name">Arthur Campos SEAS’27</div>
+            <div class="person-role">Director of Business</div>
+            <div class="person-email">Email: ac5474@columbia.edu</div>
+            <div class="person-connect">
+              <a class="connect-btn" href="https://www.linkedin.com/in/arthur-campos-sim%C3%B5es/" target="_blank" rel="noopener noreferrer">CONNECT</a>
+            </div>
+          </div>
+
         </div>
 
-        <!-- RIGHT: sticky vertical photo -->
-        <aside class="leadership-side" aria-label="Campus photo">
-          <div class="side-photo" style="--img:url('../verticals/im6.jpg');"></div>
-        </aside>
+        <h2 class="block-title">Senior Advisors</h2>
+        <div class="people-grid">
 
-      </div>
-    </div>
-  </section>
+          <div class="person-card">
+            <div class="person-photo">
+              <img src="../headshots/jacqueline.jpg" alt="Jacqueline Yang headshot">
+            </div>
+            <div class="person-name">Jacqueline Yang BC’26</div>
+            <div class="person-role">Senior Advisor</div>
+            <div class="person-email"></div>
+            <div class="person-connect">
+              <a class="connect-btn" href="https://www.linkedin.com/in/jacqueyang/" target="_blank" rel="noopener noreferrer">CONNECT</a>
+            </div>
+          </div>
 
-  <!-- FOOTER -->
-  <footer class="footer reveal" id="contact">
-    <div class="footer-inner">
-      <div class="footer-left">
-        <h4>Columbia Economics Society</h4>
-        <div class="line"><a href="mailto:econboard@columbia.edu">econboard@columbia.edu</a></div>
-        <div class="line">70 Morningside Drive</div>
-        <div class="line">New York, NY 10027</div>
-      </div>
+          <div class="person-card">
+            <div class="person-photo">
+              <img src="../headshots/ellie.jpg" alt="Ellie Reidenbach headshot">
+            </div>
+            <div class="person-name">Ellie Reidenbach CC’26</div>
+            <div class="person-role">Senior Advisor</div>
+            <div class="person-email"></div>
+            <div class="person-connect">
+              <a class="connect-btn" href="https://www.linkedin.com/in/elliereidenbach/" target="_blank" rel="noopener noreferrer">CONNECT</a>
+            </div>
+          </div>
 
-      <div class="footer-right">
-        <h4>Follow Us</h4>
-        <div class="footer-links">
-          <a href="https://www.facebook.com/ColumbiaEconomicsSociety/" aria-label="Facebook">Facebook</a>
-          <a href="https://www.instagram.com/cueconsociety/?hl=en" aria-label="Instagram">Instagram</a>
-          <a href="https://www.linkedin.com/company/columbia-economics-society/" aria-label="LinkedIn">LinkedIn</a>
-          <a href="https://linktr.ee/columbiaeconsociety?utm_source=ig&utm_medium=social&utm_content=link_in_bio" aria-label="Linktree">Linktree</a>
+          <div class="person-card">
+            <div class="person-photo">
+              <img src="../headshots/ishaan.jpg" alt="Ishaan Singh headshot">
+            </div>
+            <div class="person-name">Ishaan Singh CC’26</div>
+            <div class="person-role">Senior Advisor</div>
+            <div class="person-email"></div>
+            <div class="person-connect">
+              <a class="connect-btn" href="https://www.linkedin.com/in/ishaansingh205/" target="_blank" rel="noopener noreferrer">CONNECT</a>
+            </div>
+          </div>
+
+          <div class="person-card">
+            <div class="person-photo">
+              <img src="../headshots/justin.jpg" alt="Justin Burks Jr. headshot">
+            </div>
+            <div class="person-name">Justin Burks Jr. CC’26</div>
+            <div class="person-role">Senior Advisor</div>
+            <div class="person-email"></div>
+            <div class="person-connect">
+              <a class="connect-btn" href="https://www.linkedin.com/in/justinburksjr/" target="_blank" rel="noopener noreferrer">CONNECT</a>
+            </div>
+          </div>
+
+          <div class="person-card">
+            <div class="person-photo">
+              <img src="../headshots/renee.jpg" alt="Renee Jiang headshot">
+            </div>
+            <div class="person-name">Renee Jiang CC’26</div>
+            <div class="person-role">Senior Advisor</div>
+            <div class="person-email"></div>
+            <div class="person-connect">
+              <a class="connect-btn" href="https://www.linkedin.com/in/renee-jiang7/" target="_blank" rel="noopener noreferrer">CONNECT</a>
+            </div>
+          </div>
+
+          <div class="person-card">
+            <div class="person-photo">
+              <img src="../headshots/siddharth.jpg" alt="Siddharth Sundararajan headshot">
+            </div>
+            <div class="person-name">Siddharth Sundararajan CC’26</div>
+            <div class="person-role">Senior Advisor</div>
+            <div class="person-email"></div>
+            <div class="person-connect">
+              <a class="connect-btn" href="https://www.linkedin.com/in/siddharth-sundararajan-b1a269209/" target="_blank" rel="noopener noreferrer">CONNECT</a>
+            </div>
+          </div>
+
+          <div class="person-card">
+            <div class="person-photo">
+              <img src="../headshots/vinson.jpg" alt="Vinson Zhang headshot">
+            </div>
+            <div class="person-name">Vinson Zhang CC’26</div>
+            <div class="person-role">Senior Advisor</div>
+            <div class="person-email"></div>
+            <div class="person-connect">
+              <a class="connect-btn" href="https://www.linkedin.com/in/vinsonzhang04/" target="_blank" rel="noopener noreferrer">CONNECT</a>
+            </div>
+          </div>
+
         </div>
       </div>
+
+      <!-- RIGHT: sticky vertical photo -->
+      <aside class="leadership-side" aria-label="Campus photo">
+        <div class="side-photo" style="--img:url('../verticals/im6.jpg');"></div>
+      </aside>
+
     </div>
-  </footer>
+  </div>
+</section>
 
-  <script>
-    // =========================
-    // NAV: transparent on hero, solid after scroll
-    // =========================
-    const topbar = document.getElementById("topbar");
-    const heroEl = document.getElementById("hero");
-    function setNavState(){
-      const heroBottom = heroEl.getBoundingClientRect().bottom;
-      if(heroBottom <= 71) topbar.classList.add("is-solid");
-      else topbar.classList.remove("is-solid");
+<!-- FOOTER -->
+<footer class="footer reveal" id="contact">
+  <div class="footer-inner">
+    <div class="footer-left">
+      <h4>Columbia Economics Society</h4>
+      <div class="line"><a href="mailto:econboard@columbia.edu">econboard@columbia.edu</a></div>
+      <div class="line">70 Morningside Drive</div>
+      <div class="line">New York, NY 10027</div>
+    </div>
+
+    <div class="footer-right">
+      <h4>Follow Us</h4>
+      <div class="footer-links">
+        <a href="https://www.facebook.com/ColumbiaEconomicsSociety/" aria-label="Facebook">Facebook</a>
+        <a href="https://www.instagram.com/cueconsociety/?hl=en" aria-label="Instagram">Instagram</a>
+        <a href="https://www.linkedin.com/company/columbia-economics-society/" aria-label="LinkedIn">LinkedIn</a>
+        <a href="https://linktr.ee/columbiaeconsociety?utm_source=ig&utm_medium=social&utm_content=link_in_bio" aria-label="Linktree">Linktree</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-copy">
+    © <span id="year"></span> Columbia Economics Society. All rights reserved.
+  </div>
+</footer>
+
+<script>
+  // =========================
+  // NAV: transparent on hero, solid after scroll
+  // =========================
+  const topbar = document.getElementById("topbar");
+  const heroEl = document.getElementById("hero");
+  function setNavState(){
+    const heroBottom = heroEl.getBoundingClientRect().bottom;
+    if(heroBottom <= 71) topbar.classList.add("is-solid");
+    else topbar.classList.remove("is-solid");
+  }
+  window.addEventListener("scroll", setNavState, { passive:true });
+  window.addEventListener("resize", setNavState);
+  setNavState();
+
+  // =========================
+  // HERO SLIDESHOW (first-image gate, then crossfade)
+  // =========================
+  const slides = [
+    "../horizontals/im2.jpg",
+    "../horizontals/im7.jpg",
+    "../horizontals/im4.jpg"
+  ];
+
+  const bgA = document.getElementById("bgA");
+  const bgB = document.getElementById("bgB");
+
+  let idx = 0;
+  let showingA = true;
+  let heroTimer = null;
+
+  function setBg(el, src){
+    el.style.backgroundImage = `url('${src}')`;
+  }
+
+  function preloadRest(){
+    slides.slice(1).forEach(src => { const img = new Image(); img.src = src; });
+  }
+
+  function nextSlide(){
+    idx = (idx + 1) % slides.length;
+    const nextSrc = slides[idx];
+
+    if(showingA){
+      setBg(bgB, nextSrc);
+      bgB.style.opacity = "1";
+      bgA.style.opacity = "1";
+    }else{
+      setBg(bgA, nextSrc);
+      bgA.style.opacity = "1";
+      bgB.style.opacity = "0";
     }
-    window.addEventListener("scroll", setNavState, { passive:true });
-    window.addEventListener("resize", setNavState);
-    setNavState();
+    showingA = !showingA;
+  }
 
-    // =========================
-    // HERO SLIDESHOW (crossfade)
-    // =========================
-    const slides = [
-      "../horizontals/im2.jpg",
-      "../horizontals/im3.jpg",
-      "../horizontals/im4.jpg"
-    ];
-    slides.forEach(src => { const img = new Image(); img.src = src; });
+  function startSlideshow(){
+    const intervalMsRaw = getComputedStyle(document.documentElement).getPropertyValue("--hero-interval-ms");
+    const intervalMs = parseInt(intervalMsRaw, 10) || 5200;
 
-    const bgA = document.getElementById("bgA");
-    const bgB = document.getElementById("bgB");
+    if (heroTimer) clearInterval(heroTimer);
+    heroTimer = setInterval(nextSlide, intervalMs);
+  }
 
-    let idx = 0;
-    let showingA = true;
+  function bootHero(){
+    const first = new Image();
+    first.src = slides[0];
 
-    bgA.style.backgroundImage = `url('${slides[idx]}')`;
-    bgA.style.opacity = "1";
-    bgB.style.opacity = "0";
+    const revealHero = () => {
+      idx = 0;
+      showingA = true;
 
-    function nextSlide(){
-      idx = (idx + 1) % slides.length;
-      if(showingA){
-        bgB.style.backgroundImage = `url('${slides[idx]}')`;
-        bgB.style.opacity = "1";
-        bgA.style.opacity = "0";
-      }else{
-        bgA.style.backgroundImage = `url('${slides[idx]}')`;
-        bgA.style.opacity = "1";
-        bgB.style.opacity = "0";
-      }
-      showingA = !showingA;
-    }
+      setBg(bgA, slides[0]);
+      bgA.style.opacity = "1";
+      bgB.style.opacity = "0";
 
-    const intervalMs = parseInt(
-      getComputedStyle(document.documentElement).getPropertyValue("--hero-interval-ms")
-    );
-    setInterval(nextSlide, intervalMs);
-
-    // =========================
-    // PAGE LOAD: trigger intro animations
-    // =========================
-    window.addEventListener("load", () => {
       document.body.classList.remove("preload");
       requestAnimationFrame(() => document.body.classList.add("is-loaded"));
+
+      preloadRest();
+      startSlideshow();
+    };
+
+    if (first.complete) {
+      revealHero();
+    } else {
+      first.onload = revealHero;
+
+      // fallback so we never stay stuck in preload
+      setTimeout(() => {
+        if (document.body.classList.contains("preload")) revealHero();
+      }, 900);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", bootHero);
+
+  // =========================
+  // SCROLL REVEAL
+  // =========================
+  const revealEls = document.querySelectorAll(".reveal");
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("in"); });
+  }, { threshold: 0.01 });
+  revealEls.forEach(el => io.observe(el));
+
+  // =========================
+  // YEAR
+  // =========================
+  document.getElementById("year").textContent = new Date().getFullYear();
+</script>
+
+<script>
+  (function () {
+    const topbar = document.querySelector('.topbar');
+    const toggle = document.querySelector('.nav-toggle');
+    const nav = document.getElementById('mobileNav');
+
+    if (!topbar || !toggle || !nav) return;
+
+    function setOpen(isOpen){
+      topbar.classList.toggle('nav-open', isOpen);
+      toggle.setAttribute('aria-expanded', String(isOpen));
+      toggle.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
+    }
+
+    toggle.addEventListener('click', () => {
+      const isOpen = topbar.classList.contains('nav-open');
+      setOpen(!isOpen);
     });
 
-    // =========================
-    // SCROLL REVEAL
-    // =========================
-    const revealEls = document.querySelectorAll(".reveal");
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("in"); });
-    }, { threshold: 0.03 });
-    revealEls.forEach(el => io.observe(el));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') setOpen(false);
+    });
 
-  </script>
+    nav.addEventListener('click', (e) => {
+      const a = e.target.closest('a');
+      if (a) setOpen(false);
+    });
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 920) setOpen(false);
+    });
+  })();
+</script>
 
 </body>
 </html>
